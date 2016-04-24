@@ -2,7 +2,7 @@
 
 A collection of (hopefully) reusable React controls
 
-## Bootstrap-based controls
+## Controls based on react-bootstrap
 
 ### 1. Select Dropdown
 
