@@ -1,0 +1,29 @@
+{
+  "name": "react-controls",
+  "version": "0.0.1",
+  "description": "A collection of (hopefully) reusable React controls",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/drmalex07/react-controls.git"
+  },
+  "keywords": [
+    "ReactJS"
+  ],
+  "author": "Michail Alexakis",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/drmalex07/react-controls/issues"
+  },
+  "homepage": "https://github.com/drmalex07/react-controls#readme",
+  "dependencies": {
+    "lodash": "^4.11.1",
+    "react": "^15.0.1",
+    "react-addons-pure-render-mixin": "^15.0.1",
+    "react-bootstrap": "^0.29.2",
+    "react-dom": "^15.0.1"
+  }
+}
