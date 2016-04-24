@@ -25,5 +25,8 @@
     "react-addons-pure-render-mixin": "^15.0.1",
     "react-bootstrap": "^0.29.2",
     "react-dom": "^15.0.1"
+  },
+  "browserify": {
+    "transform": ["babelify"]
   }
 }

@@ -31,7 +31,7 @@ Notes:
 #### Example - Select Dropdown:
 
 ````javascript
-var Select = require('react-controls/components/select-dropdown');
+var Select = require('react-controls/select-dropdown');
 ...
 var Foo = React.createClass({
   ...
