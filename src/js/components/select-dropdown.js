@@ -29,9 +29,7 @@ var isSameMap = function (map1, map2)
   return _.zip(a1, a2).every(p => (_.isEqual(...p)));
 }
 
-var randomString = (d=9) => (
-  parseInt(Math.random() * Math.pow(10, d)).toString(36)
-);
+var randomString = () => (parseInt(Math.random() * 1e+9).toString(36));
 
 var Select = React.createClass({
   
@@ -46,7 +44,9 @@ var Select = React.createClass({
     value: PropTypes.string,
     options: PropTypes.instanceOf(Map), // if supplied, has precedence over children <option>s
     // Appearence
-    width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    className: PropTypes.string,
+    textClassName: PropTypes.string,
+    textWidth: PropTypes.oneOfType(PropTypes.string, PropTypes.number),
     // Callbacks
     onSelect: PropTypes.func,
     onChange: PropTypes.func,
@@ -56,7 +56,7 @@ var Select = React.createClass({
     var options = this.constructor.makeOptionMap(this.props);
     var value = this.props.value;
     return {
-      id: this.props.id || randomString(),
+      id: this.props.id || ('select-dropdown-' + randomString()),
       value: (value && options.has(value))? value : null,
       options: options,
     };
@@ -64,8 +64,7 @@ var Select = React.createClass({
   
   getDefaultProps: function () {
     return {
-      onSelect: (val) => (console.info('Selected: ' + val)),
-      width: '5em',
+      textClassName: 'text',
     };
   },
   
@@ -95,11 +94,14 @@ var Select = React.createClass({
     var options = this.state.options; 
     var value = this.state.value;
     
+    var classname = 'select-dropdown' + (
+      (this.props.className)? (' ' + this.props.className) : (''));
+    
     var textprops = 
     {
-      className: 'title text',
+      className: this.props.textClassName,
       style: {
-        width: this.props.width,
+        width: this.props.textWidth,
         display: 'inline-block',
         verticalAlign: 'top',
         textAlign: 'left',
@@ -120,6 +122,7 @@ var Select = React.createClass({
     
     return (
       <Dropdown 
+        className={classname}
         id={this.state.id}
         onSelect={(ev, val) => (this._handleSelection(val))} 
        >
@@ -154,7 +157,7 @@ var Select = React.createClass({
   // Helpers
   
   statics: {
-    
+
     makeOptionMap: function (props) {
       if (props.options) { 
         // No need to convert anything
