@@ -42,7 +42,9 @@ var Select = React.createClass({
     name: PropTypes.string,
     placeholder: PropTypes.string,
     value: PropTypes.string,
-    options: PropTypes.instanceOf(Map), // if supplied, has precedence over children <option>s
+    // Options: if supplied, has precedence over children <option>s
+    options: PropTypes.oneOfType([
+      PropTypes.instanceOf(Map), PropTypes.array]),
     // Appearence
     className: PropTypes.string,
     textClassName: PropTypes.string,
@@ -160,8 +162,13 @@ var Select = React.createClass({
 
     makeOptionMap: function (props) {
       if (props.options) { 
-        // No need to convert anything
-        return props.options;
+        if (_.isMap(props.options)) {
+          // no need to convert anything
+          return props.options;
+        } else if (_.isArray(props.options)) {
+          // convert to an identity map
+          return new Map(props.options.map(v => ([v, v])));
+        } 
       }
       
       var children = props.children;
