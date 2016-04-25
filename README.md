@@ -35,7 +35,7 @@ Notes:
 
 #### Example - Select Dropdown:
 
-```javascript
+```jsx
 var Select = require('react-controls/select-dropdown');
 ...
 var TimespanControl = React.createClass({
@@ -61,7 +61,7 @@ var TimespanControl = React.createClass({
 
 An equivalent way to write the above (with an options map, instead of children elements):
 
-```javascript
+```jsx
 var Select = require('react-controls/select-dropdown');
 ...
 var timespanOptions = new Map([
@@ -88,6 +88,8 @@ var TimespanControl = React.createClass({
 With the above component, you can style some parts of the above control (e.g. the width of the button):
 
 ```css
-#select-timespan button > .text {width: 5em}
+#select-timespan button > .text {
+  width: '5em'
+}
 ```
 
