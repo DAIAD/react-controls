@@ -29,6 +29,10 @@ var isSameMap = function (map1, map2)
   return _.zip(a1, a2).every(p => (_.isEqual(...p)));
 }
 
+var randomString = (d=9) => (
+  parseInt(Math.random() * Math.pow(10, d)).toString(36)
+);
+
 var Select = React.createClass({
   
   mixins: [
@@ -36,7 +40,7 @@ var Select = React.createClass({
   ],
 
   propTypes: {
-    id: PropTypes.string.isRequired,
+    id: PropTypes.string,
     name: PropTypes.string,
     placeholder: PropTypes.string,
     value: PropTypes.string,
@@ -52,7 +56,7 @@ var Select = React.createClass({
     var options = this.constructor.makeOptionMap(this.props);
     var value = this.props.value;
     return {
-      id: this.props.id,
+      id: this.props.id || randomString(),
       value: (value && options.has(value))? value : null,
       options: options,
     };
