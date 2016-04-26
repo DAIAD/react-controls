@@ -59,7 +59,7 @@ var Select = React.createClass({
     var value = this.props.value;
     return {
       id: this.props.id || ('select-dropdown-' + randomString()),
-      value: (value && options.has(value))? value : null,
+      value: (!(value == null) && options.has(value))? value : null,
       options: options,
     };
   },
@@ -83,7 +83,7 @@ var Select = React.createClass({
     }
     
     var value = nextProps.value;
-    if (value && nextOptions.has(value)) {
+    if (!(value == null) && nextOptions.has(value)) {
       updated.value = value;
     }
 
@@ -112,7 +112,7 @@ var Select = React.createClass({
       }
     };
     
-    var text = value? (options.get(value)) : (this.props.placeholder || '');
+    var text = (value == null)? (this.props.placeholder || '') : (options.get(value));
      
     // Maintain a controlled <input> in order to be compatible with an ordinary forms
     var input = (this.props.name)? 
