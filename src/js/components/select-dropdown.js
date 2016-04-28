@@ -124,7 +124,8 @@ var Select = React.createClass({
     };
     
     var currentOption = this.constructor.findOption(value, options);
-    var text = (currentOption == null)? this.props.placeholder : currentOption.toString();
+    var text = (currentOption == null)? 
+      this.props.placeholder : currentOption.toString();
      
     // Maintain a controlled <input> in order to be compatible with an ordinary forms
     
@@ -136,15 +137,19 @@ var Select = React.createClass({
     var groupBuilder = (group) => {
       var header = (group.group)? 
         (<MenuItem header>{group.group}</MenuItem>) : null;
-      var items = Array.from(group.options.keys()).map((v) => (
-        (<MenuItem key={v} eventKey={v} value={v}>{group.options.get(v)}</MenuItem>)
-      ));
-      return (header)? Array.concat([header], items) : items;
+      var items = Array.from(group.options.keys()).map((v) => {
+        var o = group.options.get(v);
+        var p = {key: v, eventKey: v};
+        (o.disabled)? (p.disabled = true) : null;
+        return (<MenuItem {...p}>{o.toString()}</MenuItem>);
+      });
+      return (header)? [].concat([header], items) : items;
     };
     
-    var menu = Array.concat.apply(undefined, options.map(groupBuilder));
+    var menu = [].concat(...options.map(groupBuilder));
     
     // Render
+
     return (
       <Dropdown 
         className={classname}
@@ -213,6 +218,19 @@ var Select = React.createClass({
       );
     },
 
+    makeOption: function (optionElement) {
+      var o = {
+        value: optionElement.props.value,
+        text: optionElement.props.children.toString(),
+      };
+      
+      if (optionElement.props.disabled)
+        o.disabled = optionElement.props.disabled;
+      
+      o.toString = () => (o.text);
+      return o;
+    },
+    
     makeOptions: function (props) {
       var options = [];
 
@@ -231,13 +249,13 @@ var Select = React.createClass({
         options.push(rootgroup);
         props.children.forEach((c) => {
           if (c.type == 'option') {
-            rootgroup.options.set(c.props.value, c.props.children.toString());
+            rootgroup.options.set(c.props.value, this.makeOption(c));
           } else if (c.type == 'optgroup') {
             if (c.props.children != null) {
               options.push({
                 group: c.props.label, 
                 options: new Map(c.props.children.map(c1 => (
-                  [c1.props.value, c1.props.children.toString()]
+                  [c1.props.value, this.makeOption(c1)]
                 )))
               });
             }
