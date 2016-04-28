@@ -7,7 +7,7 @@ A collection of (hopefully) reusable general-purpose React controls
 ### 1. Select Dropdown
 
 A control that mimics the ordinary `<select>`, but in an more cross-browser look-n-feel.
-It is built on Bootstrap's (`react-bootstrap`) dropdown button/menu funtionality.
+It is built on Bootstrap's (`react-bootstrap`) dropdown button/menu functionality.
 
 #### Properties - Select Dropdown:
 
@@ -20,6 +20,7 @@ It is built on Bootstrap's (`react-bootstrap`) dropdown button/menu funtionality
 | `textClassName` | No | `String` | The DOM class of the text part of the (toggle) button| `text` |
 | `textWidth` | No | `String`,`Number` | The width of the text part of the (toggle) button| `4em` |
 | `value` | No | `String` | The current value of this input (aka selected option) | `foo` |
+| `defaultValue` | No | `String` | A default value of this input (aka selected option). If `value` is missing, this will essentially build a uncontrolled input. | `foo` |
 | `placeholder` | No | `String` | The placeholder text to be shown when value is `null` | `select...` |
 | `onChange` | Yes | `(val) => ()` | A callback to be invoked when input has changed|  |
 | `onSelect` | No | `(val) => ()` | A callback to be invoked when an option was selected|  |
@@ -32,6 +33,10 @@ Notes:
     but the changed value instead.
  *  The `onSelect` callback (does not exist in `<select>`) is invoked regardless of if the selected 
     value has changed. 
+
+#### Methods - Select Dropdown
+
+A public method `getValue` is available and returns the current normalized value. Practically, this will only be needed in case the component instance is created in uncontrolled mode.
 
 #### Example - Select Dropdown:
 

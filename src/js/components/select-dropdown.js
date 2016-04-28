@@ -41,6 +41,7 @@ var Select = React.createClass({
     id: PropTypes.string,
     name: PropTypes.string,
     placeholder: PropTypes.string,
+    defaultValue: PropTypes.string,
     value: PropTypes.string,
     // Options: if supplied, has precedence over children <option>s
     options: PropTypes.oneOfType([
@@ -56,10 +57,10 @@ var Select = React.createClass({
 
   getInitialState: function () {
     var options = this.constructor.makeOptionMap(this.props);
-    var value = this.props.value;
+    var value = this.props.value, defaultValue = this.props.defaultValue;
     return {
       id: this.props.id || ('select-dropdown-' + randomString()),
-      value: (!(value == null) && options.has(value))? value : null,
+      value: (value != null && options.has(value))? value : defaultValue,
       options: options,
     };
   },
@@ -83,8 +84,10 @@ var Select = React.createClass({
     }
     
     var value = nextProps.value;
-    if (!(value == null) && nextOptions.has(value)) {
+    if (value != null && nextOptions.has(value)) {
       updated.value = value;
+    } else {
+      updated.value = nextProps.defaultValue;
     }
 
     if (!_.isEmpty(updated)) {
@@ -116,7 +119,7 @@ var Select = React.createClass({
      
     // Maintain a controlled <input> in order to be compatible with an ordinary forms
     var input = (this.props.name)? 
-      (<input type="hidden" name={this.props.name} value={this.props.value || ''}/>) : null;
+      (<input type="hidden" name={this.props.name} value={value || ''}/>) : null;
     
     var itemBuilder = (val) => (
       <MenuItem key={val} eventKey={val} value={val}>{options.get(val)}</MenuItem>
@@ -143,17 +146,31 @@ var Select = React.createClass({
   
   _handleSelection: function (val) {
     
+    var changed = (val != this.state.value);
+    
+    // Change own state
+
+    if (changed) {
+      this.setState({value: val})
+    }
+
     // Fire the supplied callbacks
 
     if (_.isFunction(this.props.onSelect)) {
       this.props.onSelect.call(undefined, val);
     }
     
-    if (_.isFunction(this.props.onChange) && val != this.state.value) {
+    if (changed && _.isFunction(this.props.onChange)) {
       this.props.onChange.call(undefined, val);
     }
 
     return false;
+  },
+
+  // Public methods
+  
+  getValue: function () {
+    return this.state.value;
   },
 
   // Helpers
