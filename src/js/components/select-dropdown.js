@@ -1,3 +1,5 @@
+'use strict'
+
 // A control that mimics the ordinary <select>, but in an more cross-browser look-n-feel.
 // It is built on Bootstrap's (react-bootstrap) dropdown button/menu funtionality.
 
@@ -21,7 +23,7 @@ var {Dropdown, MenuItem} = ReactBootstrap;
 
 var PropTypes = React.PropTypes;
 
-var isSameMap = function (map1, map2)
+var sameMap = function (map1, map2)
 {
   // We consider 2 maps equal if they contain the same (k,v) pairs with
   // exactly the same order
@@ -45,7 +47,14 @@ var Select = React.createClass({
     value: PropTypes.string,
     // Options: if supplied, has precedence over children <option>s
     options: PropTypes.oneOfType([
-      PropTypes.instanceOf(Map), PropTypes.array]),
+      PropTypes.instanceOf(Map), 
+      PropTypes.arrayOf(
+        PropTypes.shape({
+          group: PropTypes.string,
+          options: PropTypes.instanceOf(Map),
+        })
+      ),
+    ]),
     // Appearence
     className: PropTypes.string,
     textClassName: PropTypes.string,
@@ -56,11 +65,11 @@ var Select = React.createClass({
   },
 
   getInitialState: function () {
-    var options = this.constructor.makeOptionMap(this.props);
+    var options = this.constructor.makeOptions(this.props);
     var value = this.props.value, defaultValue = this.props.defaultValue;
     return {
       id: this.props.id || ('select-dropdown-' + randomString()),
-      value: (value != null && options.has(value))? value : defaultValue,
+      value: this.constructor.validateOption(value, options)? value : defaultValue,
       options: options,
     };
   },
@@ -78,13 +87,13 @@ var Select = React.createClass({
     
     var updated = {};
     
-    var nextOptions = this.constructor.makeOptionMap(nextProps);
-    if (!isSameMap(this.state.options, nextOptions)) {
+    var nextOptions = this.constructor.makeOptions(nextProps);
+    if (!sameMap(this.state.options, nextOptions)) {
       updated.options = nextOptions;
     }
     
     var value = nextProps.value;
-    if (value != null && nextOptions.has(value)) {
+    if (this.constructor.validateOption(value, nextOptions)) {
       updated.value = value;
     } else {
       updated.value = nextProps.defaultValue;
@@ -96,14 +105,13 @@ var Select = React.createClass({
   },
 
   render: function () {
-    var options = this.state.options; 
+    var options = this.state.options;
     var value = this.state.value;
     
     var classname = 'select-dropdown' + (
       (this.props.className)? (' ' + this.props.className) : (''));
     
-    var textprops = 
-    {
+    var textprops = {
       className: this.props.textClassName,
       style: {
         width: this.props.textWidth,
@@ -115,16 +123,28 @@ var Select = React.createClass({
       }
     };
     
-    var text = (value == null)? (this.props.placeholder || '') : (options.get(value));
+    var currentOption = this.constructor.findOption(value, options);
+    var text = (currentOption == null)? this.props.placeholder : currentOption.toString();
      
     // Maintain a controlled <input> in order to be compatible with an ordinary forms
+    
     var input = (this.props.name)? 
       (<input type="hidden" name={this.props.name} value={value || ''}/>) : null;
     
-    var itemBuilder = (val) => (
-      <MenuItem key={val} eventKey={val} value={val}>{options.get(val)}</MenuItem>
-    );
+    // Build menu items
     
+    var groupBuilder = (group) => {
+      var header = (group.group)? 
+        (<MenuItem header>{group.group}</MenuItem>) : null;
+      var items = Array.from(group.options.keys()).map((v) => (
+        (<MenuItem key={v} eventKey={v} value={v}>{group.options.get(v)}</MenuItem>)
+      ));
+      return (header)? Array.concat([header], items) : items;
+    };
+    
+    var menu = Array.concat.apply(undefined, options.map(groupBuilder));
+    
+    // Render
     return (
       <Dropdown 
         className={classname}
@@ -133,10 +153,10 @@ var Select = React.createClass({
        >
         {input}
         <Dropdown.Toggle>
-          <span {...textprops}>{text}</span>
+          <span {...textprops}>{text || ''}</span>
         </Dropdown.Toggle>
         <Dropdown.Menu>
-          {Array.from(options.keys()).map(itemBuilder)}
+          {menu}
         </Dropdown.Menu>
       </Dropdown>
     );
@@ -147,10 +167,11 @@ var Select = React.createClass({
   _handleSelection: function (val) {
     
     var changed = (val != this.state.value);
-    
-    // Change own state
+    var controlled = (this.props.value != null);
 
-    if (changed) {
+    // Change own state (if in uncontrolled mode)
+
+    if (changed && !controlled) {
       this.setState({value: val})
     }
 
@@ -177,29 +198,58 @@ var Select = React.createClass({
   
   statics: {
 
-    makeOptionMap: function (props) {
+    findOption: function (value, options) {
+      if (value == null)
+        return null;
+      
+      var i = options.findIndex(group => (group.options.has(value)));
+      return (i < 0)? null : options[i].options.get(value);
+    },
+    
+    validateOption: function (value, options) {
+      return (
+        (value != null) &&
+        (options.some(group => (group.options.has(value))))
+      );
+    },
+
+    makeOptions: function (props) {
+      var options = [];
+
       if (props.options) { 
         if (_.isMap(props.options)) {
-          // no need to convert anything
-          return props.options;
+          // add all options into default group
+          options = [
+            {group: null, options: props.options}
+          ];
         } else if (_.isArray(props.options)) {
-          // convert to an identity map
-          return new Map(props.options.map(v => ([v, v])));
+          // no need to convert anything
+          options = props.options;
         } 
+      } else if (props.children != null) {
+        var rootgroup = {group: null, options: new Map()};
+        options.push(rootgroup);
+        props.children.forEach((c) => {
+          if (c.type == 'option') {
+            rootgroup.options.set(c.props.value, c.props.children.toString());
+          } else if (c.type == 'optgroup') {
+            if (c.props.children != null) {
+              options.push({
+                group: c.props.label, 
+                options: new Map(c.props.children.map(c1 => (
+                  [c1.props.value, c1.props.children.toString()]
+                )))
+              });
+            }
+          } else {
+            console.assert(false,
+              'Expected children as <option> or <optgroup> elements!'
+            );
+          }
+        });
       }
-      
-      var children = props.children;
-      if (children == null)
-        return new Map([]);
-      
-      console.assert(
-        children.every(c => (c.type == 'option')),
-        'Expected all children to be plain <option> elements!'
-      );
 
-      return new Map(children.map((c) => (
-        [c.props.value, c.props.children.toString()]
-      )));
+      return options;
     },
   },
 
