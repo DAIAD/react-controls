@@ -1,6 +1,6 @@
 // Lazy-load the requested controls
-module.exports = [
+module.exports = {
   get ['select-dropdown'] () {
-    return require('src/js/components/select-dropdown')
+    return require('./src/js/components/select-dropdown')
   },
-];
+};
