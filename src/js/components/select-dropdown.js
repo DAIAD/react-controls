@@ -134,9 +134,9 @@ var Select = React.createClass({
     
     // Build menu items
     
-    var groupBuilder = (group) => {
+    var groupBuilder = (group, i) => {
       var header = (group.group)? 
-        (<MenuItem header>{group.group}</MenuItem>) : null;
+        (<MenuItem key={"optgroup-" + i} header>{group.group}</MenuItem>) : null;
       var items = Array.from(group.options.keys()).map((v) => {
         var o = group.options.get(v);
         var p = {key: v, eventKey: v};
@@ -247,14 +247,17 @@ var Select = React.createClass({
       } else if (props.children != null) {
         var rootgroup = {group: null, options: new Map()};
         options.push(rootgroup);
-        props.children.forEach((c) => {
+        var children = _.isArray(props.children)? props.children : [props.children];
+        children.forEach((c) => {
           if (c.type == 'option') {
             rootgroup.options.set(c.props.value, this.makeOption(c));
           } else if (c.type == 'optgroup') {
-            if (c.props.children != null) {
+            var opts1 = c.props.children;
+            if (opts1 != null) {
+              opts1 = _.isArray(opts1)? opts1 : [opts1];
               options.push({
                 group: c.props.label, 
-                options: new Map(c.props.children.map(c1 => (
+                options: new Map(opts1.map(c1 => (
                   [c1.props.value, this.makeOption(c1)]
                 )))
               });
