@@ -108,11 +108,15 @@ var Select = React.createClass({
     var options = this.state.options;
     var value = this.state.value;
     
+    var currentOption = this.constructor.findOption(value, options);
+    var text = (currentOption == null)? this.props.placeholder : currentOption.toString();
+   
     var classname = 'select-dropdown' + (
       (this.props.className)? (' ' + this.props.className) : (''));
     
     var textprops = {
-      className: this.props.textClassName,
+      className: this.props.textClassName +
+        ((!currentOption || !currentOption.value)? ' empty-value' : ''),
       style: {
         width: this.props.textWidth,
         display: 'inline-block',
@@ -122,10 +126,6 @@ var Select = React.createClass({
         textOverflow: 'ellipsis',
       }
     };
-    
-    var currentOption = this.constructor.findOption(value, options);
-    var text = (currentOption == null)? 
-      this.props.placeholder : currentOption.toString();
      
     // Maintain a controlled <input> in order to be compatible with an ordinary forms
     
@@ -139,8 +139,12 @@ var Select = React.createClass({
         (<MenuItem key={"optgroup-" + i} header>{group.group}</MenuItem>) : null;
       var items = Array.from(group.options.keys()).map((v) => {
         var o = group.options.get(v);
-        var p = {key: v, eventKey: v};
-        (o.disabled)? (p.disabled = true) : null;
+        var p = {
+          key: v,
+          eventKey: v,
+          disabled: (o.disabled || null),
+          className: v?  null : 'empty-value', 
+        };
         return (<MenuItem {...p}>{o.toString()}</MenuItem>);
       });
       return (header)? [].concat([header], items) : items;
