@@ -59,6 +59,8 @@ var Select = React.createClass({
     className: PropTypes.string,
     textClassName: PropTypes.string,
     textWidth: PropTypes.oneOfType(PropTypes.string, PropTypes.number),
+    // Behavior
+    allowEmptyGroups: PropTypes.bool,
     // Callbacks
     onSelect: PropTypes.func,
     onChange: PropTypes.func,
@@ -77,6 +79,7 @@ var Select = React.createClass({
   getDefaultProps: function () {
     return {
       textClassName: 'text',
+      allowEmptyGroups: false,
     };
   },
   
@@ -105,8 +108,7 @@ var Select = React.createClass({
   },
 
   render: function () {
-    var options = this.state.options;
-    var value = this.state.value;
+    var {value, options} = this.state;
     
     var currentOption = this.constructor.findOption(value, options);
     var text = (currentOption == null)? this.props.placeholder : currentOption.toString();
@@ -135,6 +137,9 @@ var Select = React.createClass({
     // Build menu items
     
     var groupBuilder = (group, i) => {
+      if (!this.props.allowEmptyGroups && !group.options.size)
+        return [];
+      
       var header = (group.group)? 
         (<MenuItem key={"optgroup-" + i} header>{group.group}</MenuItem>) : null;
       var items = Array.from(group.options.keys()).map((v) => {
@@ -147,6 +152,7 @@ var Select = React.createClass({
         };
         return (<MenuItem {...p}>{o.toString()}</MenuItem>);
       });
+      
       return (header)? [].concat([header], items) : items;
     };
     
