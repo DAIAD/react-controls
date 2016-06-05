@@ -16,10 +16,10 @@
 //    <option key={'year'} value={'year'}>{'Year'}</option>
 //  </Select>
 
-var _ = global.lodash || require('lodash');
-var React = global.React || require('react');
-var ReactBootstrap = global.ReactBootstrap || require('react-bootstrap');
-var {Dropdown, MenuItem} = ReactBootstrap;
+var _ = require('lodash');
+var React = require('react');
+var PureRenderMixin = require('react-addons-pure-render-mixin');
+var {Dropdown, MenuItem} = require('react-bootstrap');
 
 var PropTypes = React.PropTypes;
 
@@ -36,7 +36,7 @@ var randomString = () => (parseInt(Math.random() * 1e+9).toString(36));
 var Select = React.createClass({
   
   mixins: [
-    React.addons.pureRenderMixin,
+    PureRenderMixin,
   ],
 
   propTypes: {
