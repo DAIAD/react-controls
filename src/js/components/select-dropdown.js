@@ -245,7 +245,7 @@ var Select = React.createClass({
       var options = [];
 
       if (props.options) { 
-        if (_.isMap(props.options)) {
+        if (props.options instanceof Map) {
           // add all options into default group
           options = [
             {group: null, options: props.options}
