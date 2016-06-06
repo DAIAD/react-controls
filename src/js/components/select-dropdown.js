@@ -118,7 +118,7 @@ var Select = React.createClass({
     
     var textprops = {
       className: this.props.textClassName +
-        ((!currentOption || !currentOption.value)? ' empty-value' : ''),
+        ((!currentOption || (_.isObject(currentOption) && !currentOption.value))? ' empty-value' : ''),
       style: {
         width: this.props.textWidth,
         display: 'inline-block',
